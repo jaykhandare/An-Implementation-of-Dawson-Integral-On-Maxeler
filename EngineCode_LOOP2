@@ -1,0 +1,46 @@
+/**
+ * Document: MaxCompiler tutorial (maxcompiler-tutorial.pdf)
+ * Chapter: 4      Example: 2      Name: Simple
+ * MaxFile name: Simple
+ * Summary:
+ * 	 Takes a stream and for each value x calculates x^2 + x.
+ */
+package simple;
+
+import com.maxeler.maxcompiler.v2.kernelcompiler.Kernel;
+import com.maxeler.maxcompiler.v2.kernelcompiler.KernelParameters;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEVar;
+import com.maxeler.maxcompiler.v2.kernelcompiler.types.base.DFEType;
+/*  for exp() function  */
+import com.maxeler.maxcompiler.v2.kernelcompiler.stdlib.KernelMath;
+
+class SimpleKernel extends Kernel {
+
+	SimpleKernel(KernelParameters parameters) {
+		super(parameters);
+
+        DFEVar H = constant.var(dfeFloat(8, 24),0.4);
+
+        // scalar Input
+        DFEVar x = io.scalarInput("x",dfeFloat(8, 24));
+
+		// stream Input
+		DFEVar i = io.input("cOut", dfeFloat(8, 24));
+
+		// stuff
+        DFEVar xx =  KernelMath.abs(x);
+        DFEVar n0 = 2 * (0.5 * xx / H + 0.5);
+        DFEVar xp = xx - n0 * H;
+        DFEVar e1 = KernelMath.exp(2.0 * xp * H);
+        DFEVar e2 = e1 * e1;
+        DFEVar d1 = n0 + 1.0;
+        DFEVar d2 = d1 - 2.0;
+
+        // counter manipulations
+
+        DFEVar result = i * (e1 / d1 + 1.0 / (d2 * e1));
+
+		// Output
+		io.output("y", result, dfeFloat(8, 24));
+	}
+}
